@@ -7,10 +7,20 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Dependency directories
+/frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+/backend/bin/
+/backend/obj/
+
+# Build output
+**/build/
+**/dist/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
 
 # Editor directories and files
 .vscode/*
