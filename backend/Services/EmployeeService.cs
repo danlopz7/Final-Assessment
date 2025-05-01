@@ -22,8 +22,8 @@ namespace backend.Services
             var employees = await _employeeRepository.GetAllEmployeesAsync();
             return employees.Select(e => new EmployeeSimpleDto
             {
-                FirstName = e.FirstName,
-                LastName = e.LastName
+                Id = e.EmployeeId,
+                FullName = $"{e.FirstName} {e.LastName}"
             }).ToList();
         }
     }

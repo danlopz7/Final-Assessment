@@ -22,6 +22,7 @@ namespace backend.Services
             var customers = await _customerRepository.GetAllCustomersAsync();
             return customers.Select(c => new CustomerSimpleDto
             {
+                Id = c.CustomerId,
                 ContactName = c.ContactName
             }).ToList();
         }

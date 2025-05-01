@@ -1,15 +1,6 @@
 import axios from 'axios';
 
-/* export async function fetchOrder() {
-  const res = await axios.get('/api/orders/latest');
-  return res.data;
-}
-
-export async function saveOrder(order, details) {
-  await axios.post('/api/orders/save', { order, details });
-} */
-
-const API_URL = '/api/orders';
+const API_URL = 'http://localhost:5027/api/orders';
 
 export const fetchOrders = async () => {
   const response = await axios.get(API_URL);
@@ -18,6 +9,11 @@ export const fetchOrders = async () => {
 
 export const fetchOrderById = async (orderId) => {
   const response = await axios.get(`${API_URL}/${orderId}`);
+  return response.data;
+};
+
+export const fetchFirstOrder = async () => {
+  const response = await axios.get(`${API_URL}/first`);
   return response.data;
 };
 
@@ -42,3 +38,23 @@ export const generateOrderReport = async (orderId) => {
   });
   return response.data;
 };
+
+export const fetchNextOrder = async (currentId) => {
+  const response = await axios.get(`${API_URL}/${currentId}/next`);
+  return response.data; // si no hay next, manejar 204 en el hook
+};
+
+export const fetchPreviousOrder = async (currentId) => {
+  const response = await axios.get(`${API_URL}/${currentId}/previous`);
+  return response.data;
+};
+
+
+/* export async function fetchOrder() {
+  const res = await axios.get('/api/orders/latest');
+  return res.data;
+}
+
+export async function saveOrder(order, details) {
+  await axios.post('/api/orders/save', { order, details });
+} */

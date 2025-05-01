@@ -1,5 +1,5 @@
 import React from 'react';
-import OrdersPage from './pages/OrdersPage';
+import OrdersPage2 from './pages/OrdersPage2';
 
 function App() {
   return (
@@ -8,7 +8,7 @@ function App() {
         Order Management System
       </header>
       <main className="p-6">
-        <OrdersPage />
+        <OrdersPage2 />
       </main>
     </div>
   );

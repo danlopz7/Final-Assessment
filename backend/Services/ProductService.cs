@@ -22,6 +22,7 @@ namespace backend.Services
             var products = await _productRepository.GetAllProductsAsync();
             return products.Select(p => new ProductSimpleDto
             {
+                Id = p.ProductId,
                 ProductName = p.ProductName,
                 UnitPrice = p.UnitPrice
             }).ToList();

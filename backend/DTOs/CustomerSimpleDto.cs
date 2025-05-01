@@ -7,6 +7,7 @@ namespace backend.DTOs
 {
     public class CustomerSimpleDto
     {
+        public string Id { get; set; }
         public string ContactName { get; set; }
     }
 }

@@ -9,7 +9,12 @@ namespace backend.Services.Interfaces
 {
     public interface IOrderService
     {
+        Task<OrderDto> GetFirstOrderAsync();
         Task<OrderDto> GetOrderByIdAsync(int id);
-        Task<OrderDto> CreateOrderAsync(OrderDto orderDto);
+        Task<OrderDto> GetNextOrderAsync(int id);
+        Task<OrderDto> GetPreviousOrderAsync(int id);
+        Task<bool> ExistsOrderAfterAsync(int currentId);
+        Task<bool> ExistsOrderBeforeAsync(int currentId);
+        Task<OrderDto> CreateOrderAsync(OrderDto dto);
     }
 }
