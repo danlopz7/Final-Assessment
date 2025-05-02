@@ -4,6 +4,7 @@ import OrderInfo from '../components/OrderInfo';
 import OrderDetailsList from '../components/OrderDetailsList';
 import OrderMap from '../components/OrderMap';
 import useOrderData from '../hooks2/useOrderData';
+import useOrderOptions from '../hooks2/useOrderOptions';
 
 const OrdersPage = () => {
   // Custom hook con separación por responsabilidad
@@ -42,6 +43,11 @@ const OrdersPage = () => {
     validateAddressWithGeocoding,
   } = useOrderData();
 
+  const {
+    products,
+    loadProducts
+  } = useOrderOptions();
+
   return (
     <div className="max-w-7xl mx-auto p-6">
       {/* Acciones superiores */}
@@ -78,6 +84,8 @@ const OrdersPage = () => {
         onEditDetail={handleEditDetail}
         onDeleteDetail={handleDeleteDetail}
         isEditing={isEditing}
+        products={products}
+        loadProducts={loadProducts}
       />
 
       {/* Mapa de dirección validada */}

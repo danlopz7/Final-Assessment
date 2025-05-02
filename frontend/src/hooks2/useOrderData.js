@@ -15,6 +15,7 @@ const useOrderData = () => {
     updateMapCoordinates: address.updateMapCoordinates,
     setHasNextOrder: orderState.setHasNextOrder,
     setHasPreviousOrder: orderState.setHasPreviousOrder,
+    resetAddressState: address.resetAddressState,
   });
 
   // Carga inicial al montar el componente
@@ -48,7 +49,9 @@ const useOrderData = () => {
 
     handleOrderInfoChange: orderState.handleOrderInfoChange,            /** Cambia el valor de un campo del formulario (customer, date, etc.) */
     handleNewOrder: orderState.handleNewOrder,                          /** Crea una nueva orden en blanco */
-    handleEditOrder: orderState.handleEditOrder,                        /** Activa el modo edición */dit: () =>
+    handleEditOrder: orderState.handleEditOrder,                         /** Activa el modo edición */
+
+    handleCancelEdit: () =>
       orderState.handleCancelEdit(address.setShippingAddressString),    /** Cancela la edición y restaura los valores originales */
 
     handleSaveOrder: () =>
@@ -58,6 +61,9 @@ const useOrderData = () => {
         address.shippingAddressString,
         () => orderState.setIsEditing(false)
       ),                                                                /** Guarda la orden actual (crear o actualizar) */
+
+    handleNewOrder: () =>
+      orderState.handleNewOrder(address.resetAddressState),             /** Limpia campos al seleccionar nueva orden */
 
     handleDeleteOrder: crud.handleDeleteOrder,                          /** Elimina la orden actual (simulado) */
     handleGenerateReport: crud.handleGenerateReport,                    /** Genera un PDF de la orden actual (simulado) */

@@ -31,7 +31,7 @@ const useOrderCrud = ({
     setOrderData({
       orderId: data.orderId,
       customerName: customer.contactName,
-      employeeName: `${employee.firstName} ${employee.lastName}`,
+      employeeName: employee.fullName,
       orderDate: formatDateForInput(data.orderDate),
     });
 

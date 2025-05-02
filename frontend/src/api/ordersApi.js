@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5027/api/orders';
+const BASE_URL = 'http://localhost:5027/api'
+const API_URL = `${BASE_URL}/orders`;
+const CUSTOMERS_URL = `${BASE_URL}/customers`;
+const EMPLOYEES_URL = `${BASE_URL}/employees`;
+const PRODUCTS_URL = `${BASE_URL}/products`;
+
 
 export const fetchOrders = async () => {
   const response = await axios.get(API_URL);
@@ -46,6 +51,21 @@ export const fetchNextOrder = async (currentId) => {
 
 export const fetchPreviousOrder = async (currentId) => {
   const response = await axios.get(`${API_URL}/${currentId}/previous`);
+  return response.data;
+};
+
+export const fetchCustomers = async () => {
+  const response = await axios.get(CUSTOMERS_URL);
+  return response.data;
+};
+
+export const fetchEmployees = async () => {
+  const response = await axios.get(EMPLOYEES_URL);
+  return response.data;
+};
+
+export const fetchProducts = async () => {
+  const response = await axios.get(PRODUCTS_URL);
   return response.data;
 };
 

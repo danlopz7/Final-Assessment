@@ -100,6 +100,20 @@ const useAddress = () => {
     };
   };
 
+  const resetAddressState = () => {
+    setShippingAddressString('');
+    setMapCoords({ lat: 0, lng: 0 });
+    setIsAddressValid(null);
+    setParsedAddressFields({
+      street: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      country: '',
+    });
+  };
+  
+
   // Alias por compatibilidad
   const updateMapCoordinates = validateAddressWithGeocoding;
 
@@ -113,7 +127,8 @@ const useAddress = () => {
     parsedAddressFields,
     handleSelectAddress,
     validateAddressWithGeocoding,
-    updateMapCoordinates//: validateAddressWithGeocoding, // para compatibilidad con el código actual
+    updateMapCoordinates,         //: validateAddressWithGeocoding, // para compatibilidad con el código actual
+    resetAddressState
   };
 };
 
