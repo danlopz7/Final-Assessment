@@ -9,5 +9,6 @@ namespace backend.Repositories.Interfaces
     public interface IProductRepository
     {
         Task<IEnumerable<Product>> GetAllProductsAsync();
+        Task<Product> FindByIdAsync(int id);
     }
 }

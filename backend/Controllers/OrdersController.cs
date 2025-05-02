@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using backend.DTOs;
+using backend.DTOs.input;
+using backend.DTOs.output;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,7 +25,8 @@ namespace backend.Controllers
         public async Task<IActionResult> GetFirstOrder()
         {
             var order = await _orderService.GetFirstOrderAsync();
-            if (order == null) return NotFound();
+            if (order == null)
+                return NotFound();
 
             var result = await BuildNavigationResult(order.OrderId, order);
             return Ok(result);
@@ -35,42 +37,28 @@ namespace backend.Controllers
         public async Task<IActionResult> GetOrderById(int id)
         {
             var order = await _orderService.GetOrderByIdAsync(id);
-            if (order == null) return NotFound();
+            if (order == null)
+                return NotFound();
 
             var result = await BuildNavigationResult(id, order);
             return Ok(result);
         }
 
-        // GET /api/orders/{id}/next
-        [HttpGet("{id}/next")]
-        public async Task<IActionResult> GetNextOrder(int id)
+        /* // POST /api/orders
+        [HttpPost]
+        public async Task<IActionResult> CreateOrder([FromBody] OrderInputDto dto)
         {
-            var order = await _orderService.GetNextOrderAsync(id);
-            if (order == null) return NoContent();
-
-            var result = await BuildNavigationResult(order.OrderId, order);
-            return Ok(result);
-        }
-
-        // GET /api/orders/{id}/previous
-        [HttpGet("{id}/previous")]
-        public async Task<IActionResult> GetPreviousOrder(int id)
-        {
-            var order = await _orderService.GetPreviousOrderAsync(id);
-            if (order == null) return NoContent();
-
-            var result = await BuildNavigationResult(order.OrderId, order);
-            return Ok(result);
-        }
+            var created = await _orderService.CreateOrderAsync(dto);
+            return CreatedAtAction(nameof(GetOrderById), new { id = created.OrderId }, created);
+        } */
 
         // POST /api/orders
         [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] OrderDto orderDto)
+        public async Task<IActionResult> CreateOrUpdateOrder([FromBody] OrderInputDto dto)
         {
-            var created = await _orderService.CreateOrderAsync(orderDto);
-            return CreatedAtAction(nameof(GetOrderById), new { id = created.OrderId }, created);
+            var result = await _orderService.CreateOrUpdateOrderAsync(dto);
+            return Ok(result);
         }
-
 
         private async Task<NavigationResultDto> BuildNavigationResult(int orderId, OrderDto order)
         {
@@ -81,42 +69,32 @@ namespace backend.Controllers
             {
                 Order = order,
                 HasNext = hasNext,
-                HasPrevious = hasPrevious
+                HasPrevious = hasPrevious,
             };
         }
 
-
-
-        /* // Create a new order
-        [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] OrderDto orderDto)
-        {
-            var createdOrder = await _orderService.CreateOrderAsync(orderDto);
-            return CreatedAtAction(
-                nameof(GetOrderById),
-                new { id = createdOrder.OrderId },
-                createdOrder
-            );
-        } */
-
-        /* [HttpGet("{id}/next")]
+        // GET /api/orders/{id}/next
+        [HttpGet("{id}/next")]
         public async Task<IActionResult> GetNextOrder(int id)
         {
-            var nextOrder = await _orderService.GetNextOrderAsync(id);
-            if (nextOrder == null)
-                return NoContent(); // 204 cuando no hay siguiente
+            var order = await _orderService.GetNextOrderAsync(id);
+            if (order == null)
+                return NoContent();
 
-            return Ok(nextOrder);
+            var result = await BuildNavigationResult(order.OrderId, order);
+            return Ok(result);
         }
 
+        // GET /api/orders/{id}/previous
         [HttpGet("{id}/previous")]
         public async Task<IActionResult> GetPreviousOrder(int id)
         {
-            var previousOrder = await _orderService.GetPreviousOrderAsync(id);
-            if (previousOrder == null)
-                return NoContent(); // 204 cuando no hay anterior
+            var order = await _orderService.GetPreviousOrderAsync(id);
+            if (order == null)
+                return NoContent();
 
-            return Ok(previousOrder);
-        } */
+            var result = await BuildNavigationResult(order.OrderId, order);
+            return Ok(result);
+        }
     }
 }

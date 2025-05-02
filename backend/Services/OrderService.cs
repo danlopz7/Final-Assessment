@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using backend.DTOs;
+using backend.DTOs.input;
+using backend.DTOs.output;
 using backend.Models.Entities;
 using backend.Repositories.Interfaces;
 using backend.Services.Interfaces;
@@ -12,10 +13,22 @@ namespace backend.Services
     public class OrderService : IOrderService
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly ICustomerRepository _customerRepository;
+        private readonly IEmployeeRepository _employeeRepository;
+        private readonly IProductRepository _productRepository;
 
-        public OrderService(IOrderRepository orderRepository)
+        public OrderService(
+            IOrderRepository orderRepository,
+            ICustomerRepository customerRepository,
+            IEmployeeRepository employeeRepository,
+            IProductRepository productRepository
+        )
         {
             _orderRepository = orderRepository;
+            _orderRepository = orderRepository;
+            _customerRepository = customerRepository;
+            _employeeRepository = employeeRepository;
+            _productRepository = productRepository;
         }
 
         public async Task<OrderDto> GetFirstOrderAsync()
@@ -30,12 +43,106 @@ namespace backend.Services
             return order == null ? null : MapOrderToDto(order);
         }
 
-        // endpoint to save data from the UI
-        public async Task<OrderDto> CreateOrderAsync(OrderDto orderDto)
+        public async Task<OrderDto> CreateOrUpdateOrderAsync(OrderInputDto dto)
         {
-            // convert OrderDto back to Order entity
-            // Then call the repository to save it.
-            return null;
+            if (dto.OrderId == null)
+            {
+                return await CreateOrderAsync(dto);
+            }
+            else
+            {
+                return await UpdateOrderAsync(dto);
+            }
+        }
+
+        // endpoint to save data from the UI
+        public async Task<OrderDto> CreateOrderAsync(OrderInputDto dto)
+        {
+            // 1. Validar existencia de Customer y Employee
+            var customer = await _customerRepository.FindByIdAsync(dto.Customer.Id);
+            if (customer == null)
+                throw new Exception($"Customer with ID {dto.Customer.Id} not found.");
+
+            var employee = await _employeeRepository.FindByIdAsync(dto.Employee.Id);
+            if (employee == null)
+                throw new Exception($"Employee with ID {dto.Employee.Id} not found.");
+
+            // 2. Crear la entidad Order
+            var order = new Order
+            {
+                OrderDate = dto.OrderDate ?? DateTime.UtcNow,
+                CustomerId = dto.Customer.Id,
+                EmployeeId = dto.Employee.Id,
+                ShipAddress = dto.ShippingAddress.ShipAddress,
+                ShipCity = dto.ShippingAddress.ShipCity,
+                ShipRegion = dto.ShippingAddress.ShipRegion,
+                ShipPostalCode = dto.ShippingAddress.ShipPostalCode,
+                ShipCountry = dto.ShippingAddress.ShipCountry,
+                OrderDetails = new List<OrderDetail>(),
+            };
+
+            // 3. Construir OrderDetails
+            foreach (var detailDto in dto.OrderDetails)
+            {
+                var product = await _productRepository.FindByIdAsync(detailDto.Product.Id);
+                if (product == null)
+                    throw new Exception($"Product with ID {detailDto.Product.Id} not found.");
+
+                order.OrderDetails.Add(
+                    new OrderDetail
+                    {
+                        ProductId = product.ProductId,
+                        Quantity = detailDto.Quantity,
+                        UnitPrice = product.UnitPrice ?? 0, // default if null
+                    }
+                );
+            }
+
+            // 4. Guardar en la base de datos
+            await _orderRepository.AddOrderAsync(order);
+
+            // 5. Retornar como OrderDto usando método de mapeo
+            return MapOrderToDto(order);
+        }
+
+        private async Task<OrderDto> UpdateOrderAsync(OrderInputDto dto)
+        {
+            var order = await _orderRepository.GetOrderByIdWithDetailsAsync(dto.OrderId.Value);
+            if (order == null)
+                throw new Exception($"Order with ID {dto.OrderId.Value} not found.");
+
+            // Actualizar propiedades
+            order.OrderDate = dto.OrderDate ?? order.OrderDate;
+            order.CustomerId = dto.Customer.Id;
+            order.EmployeeId = dto.Employee.Id;
+            order.ShipAddress = dto.ShippingAddress.ShipAddress;
+            order.ShipCity = dto.ShippingAddress.ShipCity;
+            order.ShipRegion = dto.ShippingAddress.ShipRegion;
+            order.ShipPostalCode = dto.ShippingAddress.ShipPostalCode;
+            order.ShipCountry = dto.ShippingAddress.ShipCountry;
+
+            // Limpiar y reemplazar los detalles
+            order.OrderDetails.Clear();
+
+            foreach (var detailDto in dto.OrderDetails)
+            {
+                var product = await _productRepository.FindByIdAsync(detailDto.Product.Id);
+                if (product == null)
+                    throw new Exception($"Product with ID {detailDto.Product.Id} not found.");
+
+                order.OrderDetails.Add(
+                    new OrderDetail
+                    {
+                        ProductId = product.ProductId,
+                        Quantity = detailDto.Quantity,
+                        UnitPrice = product.UnitPrice ?? 0
+                    }
+                );
+            }
+
+            await _orderRepository.UpdateOrderAsync(order);
+
+            return MapOrderToDto(order);
         }
 
         public async Task<OrderDto> GetNextOrderAsync(int id)
@@ -67,10 +174,10 @@ namespace backend.Services
             {
                 OrderId = order.OrderId,
                 OrderDate = order.OrderDate,
-                Customer = new CustomerSimpleDto 
-                { 
+                Customer = new CustomerSimpleDto
+                {
                     Id = order.Customer?.CustomerId,
-                    ContactName = order.Customer?.ContactName 
+                    ContactName = order.Customer?.ContactName,
                 },
                 Employee = new EmployeeSimpleDto
                 {
@@ -101,7 +208,6 @@ namespace backend.Services
                     .ToList(),
             };
         }
-
     }
 }
 

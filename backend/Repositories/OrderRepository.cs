@@ -99,6 +99,17 @@ namespace backend.Repositories
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<Order> GetOrderByIdWithDetailsAsync(int id)
+        {
+            return await _context
+                .Orders.Include(o => o.Customer)
+                .Include(o => o.Employee)
+                .Include(o => o.Shipper)
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.Product)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+        }
+
         public async Task<bool> ExistsOrderAfter(int currentId)
         {
             return await _context.Orders.AnyAsync(o => o.OrderId > currentId);

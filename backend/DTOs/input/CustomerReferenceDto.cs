@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace backend.DTOs
+namespace backend.DTOs.input
 {
-    public class CustomerSimpleDto
+    public class CustomerReferenceDto
     {
         public string Id { get; set; }
-        public string ContactName { get; set; }
     }
 }

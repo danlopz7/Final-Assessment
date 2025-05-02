@@ -9,5 +9,6 @@ namespace backend.Repositories.Interfaces
     public interface IEmployeeRepository
     {
         Task<IEnumerable<Employee>> GetAllEmployeesAsync();
+        Task<Employee> FindByIdAsync(int id);
     }
 }

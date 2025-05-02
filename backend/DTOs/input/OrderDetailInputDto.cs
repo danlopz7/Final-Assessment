@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace backend.DTOs
+namespace backend.DTOs.input
 {
-    public class OrderDetailDto
+    public class OrderDetailInputDto
     {
-        public ProductSimpleDto Product { get; set; }
+        public ProductReferenceDto Product { get; set; }
         public short Quantity { get; set; }
     }
 }

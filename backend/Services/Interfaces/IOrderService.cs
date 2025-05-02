@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using backend.DTOs;
+using backend.DTOs.input;
+using backend.DTOs.output;
 
 // Fetch one Order by ID and Create Order
 namespace backend.Services.Interfaces
@@ -15,6 +16,9 @@ namespace backend.Services.Interfaces
         Task<OrderDto> GetPreviousOrderAsync(int id);
         Task<bool> ExistsOrderAfterAsync(int currentId);
         Task<bool> ExistsOrderBeforeAsync(int currentId);
-        Task<OrderDto> CreateOrderAsync(OrderDto dto);
+        Task<OrderDto> CreateOrderAsync(OrderInputDto dto);
+        Task<OrderDto> CreateOrUpdateOrderAsync(OrderInputDto dto);
+
+        
     }
 }

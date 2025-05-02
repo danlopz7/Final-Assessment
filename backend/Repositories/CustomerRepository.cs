@@ -22,5 +22,10 @@ namespace backend.Repositories
         {
             return await _context.Customers.ToListAsync();
         }
+
+        public async Task<Customer> FindByIdAsync(string id)
+        {
+            return await _context.Customers.FindAsync(id);
+        }
     }
 }
