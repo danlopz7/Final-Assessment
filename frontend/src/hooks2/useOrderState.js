@@ -8,12 +8,12 @@ const useOrderState = () => {
     const [orderData, setOrderData] = useState(null);       // Datos de la orden actual cargada
     const [orderDetails, setOrderDetails] = useState([]);   // Detalles de productos de la orden
     const [isEditing, setIsEditing] = useState(false);      // Bandera para saber si estamos editando
-    
+
     const [hasNextOrder, setHasNextOrder] = useState(false);
     const [hasPreviousOrder, setHasPreviousOrder] = useState(false);
 
-    const [originalOrderData, setOriginalOrderData] = useState(null);       // Copias originales para poder cancelar cambios
-    const [originalOrderDetails, setOriginalOrderDetails] = useState([]);   // Copias originales para poder cancelar cambios
+    const [originalOrderData, setOriginalOrderData] = useState(null);                       // Copias originales para poder cancelar cambios
+    const [originalOrderDetails, setOriginalOrderDetails] = useState([]);                   // Copias originales para poder cancelar cambios
     const [originalShippingAddressString, setOriginalShippingAddressString] = useState(''); // Copias originales para poder cancelar cambios
 
     // Inicia una nueva orden vacía. Limpia los campos
@@ -25,8 +25,6 @@ const useOrderState = () => {
         });
         setOrderDetails([]);                // Limpia tabla de productos
         resetAddressState?.();              // limpia dirección, coords, y campos parsed
-        //setShippingAddressString('');     CHECK WHY THIS WASNT INCLUDED
-        //setMapCoords({ lat: 0, lng: 0 }); CHECK WHY THIS WASNT INCLUDED 
         setIsEditing(true);
     };
 
@@ -71,6 +69,14 @@ const useOrderState = () => {
         setOrderDetails(prev => prev.filter((_, i) => i !== index));
     };
 
+    const applyLoadedOrder = (formattedOrderData, formattedDetails, formattedAddress) => {
+        setOrderData(formattedOrderData);
+        setOrderDetails(formattedDetails);
+        setOriginalOrderData(formattedOrderData);
+        setOriginalOrderDetails(formattedDetails);
+        setOriginalShippingAddressString(formattedAddress);
+    };
+
     return {
         orderData,
         setOrderData,
@@ -91,6 +97,7 @@ const useOrderState = () => {
         handleAddDetail,
         handleEditDetail,
         handleDeleteDetail,
+        applyLoadedOrder,
         hasNextOrder,
         setHasNextOrder,
         hasPreviousOrder,
@@ -99,25 +106,3 @@ const useOrderState = () => {
 };
 
 export default useOrderState;
-
-
-
-
-    // const handlePreviousOrder = (loadOrder) => {
-    //     if (orders.length > 0 && currentOrderIndex > 0) {
-    //         const newIndex = currentOrderIndex - 1;
-    //         setCurrentOrderIndex(newIndex);
-    //         loadOrder(orders[newIndex].id);
-    //     }
-    // };
-
-    // /**
-    //  * Navega a la siguiente orden si no estamos al final.
-    //  */
-    // const handleNextOrder = (loadOrder) => {
-    //     if (orders.length > 0 && currentOrderIndex < orders.length - 1) {
-    //         const newIndex = currentOrderIndex + 1;
-    //         setCurrentOrderIndex(newIndex);
-    //         loadOrder(orders[newIndex].id);
-    //     }
-    // };

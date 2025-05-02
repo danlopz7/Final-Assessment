@@ -157,7 +157,7 @@ const OrderInfo = ({
               />
               <datalist id="employee-options">
                 {employees.map(e => (
-                  <option key={e.id} value={e.employeeName} />
+                  <option key={e.id} value={e.fullName} />
                 ))}
               </datalist>
             </div>

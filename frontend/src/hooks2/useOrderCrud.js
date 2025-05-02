@@ -7,67 +7,62 @@ import { fetchFirstOrder, fetchOrderById, fetchNextOrder, fetchPreviousOrder } f
  */
 
 const useOrderCrud = ({
-  setOrderData,
-  setOrderDetails,
-  setShippingAddressString,
-  updateMapCoordinates,
-  setOriginalOrderData,
-  setOriginalOrderDetails,
-  setOriginalShippingAddressString,
   setHasNextOrder,
   setHasPreviousOrder,
 }) => {
 
-  // Convierte los datos recibidos del backend al formato del frontend.
+  /**
+   * Convierte la estructura del backend a un formato plano para el frontend.
+   */
   const mapBackendData = useCallback((data) => {
     const { customer, employee, shippingAddress, orderDetails } = data;
-    const fullAddress = `${shippingAddress.shipAddress}, ${shippingAddress.shipCity}, ${shippingAddress.shipRegion || ''} ${shippingAddress.shipPostalCode}, ${shippingAddress.shipCountry}`.replace(/\s+,/g, '').trim();
-    
-    const formatDateForInput = (isoString) => {
-      const date = new Date(isoString);
-      return date.toISOString().split('T')[0];
-    };
 
-    setOrderData({
+    const formattedOrderData = {
       orderId: data.orderId,
       customerName: customer.contactName,
       employeeName: employee.fullName,
-      orderDate: formatDateForInput(data.orderDate),
-    });
+      orderDate: new Date(data.orderDate).toISOString().split('T')[0],
+    };
 
-    const details = orderDetails.map(detail => ({
+    const formattedAddress = `${shippingAddress.shipAddress}, ${shippingAddress.shipCity}, ${shippingAddress.shipRegion || ''} ${shippingAddress.shipPostalCode}, ${shippingAddress.shipCountry}`
+      .replace(/\s+,/g, '')
+      .trim();
+
+    const formattedDetails = orderDetails.map((detail) => ({
       productName: detail.product.productName,
       unitPrice: detail.product.unitPrice,
       quantity: detail.quantity,
     }));
 
-    setOrderDetails(details);                                       // Actualiza el estado visual actual de la tabla de productos (OrderDetailsList)
-    setShippingAddressString(fullAddress);                          // Muestra el texto completo de la dirección en el campo "Shipping Address"
-    setOriginalOrderData({ ...data, orderDate: data.orderDate });   // para cancel edit. Guarda una copia original de la orden actual.
-    setOriginalOrderDetails(details);                               // para cancel edit. Guarda una copia original de los detalles de productos
-    setOriginalShippingAddressString(fullAddress);                  // para cancel edit. Guarda el texto de la dirección original. Sin esto, si escribes una dirección nueva y cancelas, no podrías restaurar la original
-    updateMapCoordinates(fullAddress);                              // Convierte la dirección a coordenadas (via Geocoding) y actualiza el centro del mapa.
+    return {
+      formattedOrderData,
+      formattedDetails,
+      formattedAddress,
+    };
   }, []);
 
+  /**
+   * Carga la primera orden desde el backend.
+   */
   const loadInitialOrder = async () => {
     try {
-      //const data = await fetchFirstOrder(); // axios ya devuelve `response.data`
       const { order, hasNext, hasPrevious } = await fetchFirstOrder();
-      //console.log('data:', data);
       if (order) {
-        mapBackendData(order);
         setHasNextOrder(hasNext);
         setHasPreviousOrder(hasPrevious);
+        return mapBackendData(order);
       }
-      //mapBackendData(data);
     } catch (error) {
       console.error('Error al cargar la primera orden:', error);
     }
   };
 
+  /**
+   * Carga una orden por ID.
+   */
   const loadOrder = async (orderId) => {
     const data = await fetchOrderById(orderId);
-    mapBackendData(data);
+    return mapBackendData(data);
   };
 
   // Guarda una orden (crear o actualizar). Simulado por ahora.
@@ -120,23 +115,27 @@ const useOrderCrud = ({
     console.log("Reporte generado (simulado)");
   };
 
-  // Go to next order in list
+  /**
+   * Carga la siguiente orden respecto a una ID actual.
+   */
   const loadNextOrder = async (orderId) => {
     const { order, hasNext, hasPrevious } = await fetchNextOrder(orderId);
     if (order) {
-      mapBackendData(order);
       setHasNextOrder(hasNext);
       setHasPreviousOrder(hasPrevious);
+      return mapBackendData(order);
     }
   };
-  
-  // Go to previous order in list
+
+  /**
+   * Carga la orden anterior respecto a una ID actual.
+   */
   const loadPreviousOrder = async (orderId) => {
     const { order, hasNext, hasPrevious } = await fetchPreviousOrder(orderId);
     if (order) {
-      mapBackendData(order);
       setHasNextOrder(hasNext);
       setHasPreviousOrder(hasPrevious);
+      return mapBackendData(order);
     }
   };
 
@@ -153,27 +152,3 @@ const useOrderCrud = ({
 };
 
 export default useOrderCrud;
-
-
-
-// Carga una orden de prueba simulada (cuando no hay backend).
-/* const loadInitialOrder = async () => {
-  const fakeData = {
-    orderId: 10249,
-    orderDate: "1996-07-05T00:00:00",
-    customer: { contactName: "Karin Josephs" },
-    shippingAddress: {
-      shipAddress: "Luisenstr. 48",
-      shipCity: "Münster",
-      shipRegion: null,
-      shipPostalCode: "44087",
-      shipCountry: "Germany"
-    },
-    employee: { firstName: "Michael", lastName: "Suyama" },
-    orderDetails: [
-      { product: { productName: "Tofu", unitPrice: 23.25 }, quantity: 9 },
-      { product: { productName: "Manjimup Dried Apples", unitPrice: 53.00 }, quantity: 40 }
-    ]
-  };
-  mapBackendData(fakeData);
-}; */
