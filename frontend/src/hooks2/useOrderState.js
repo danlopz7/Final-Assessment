@@ -19,7 +19,9 @@ const useOrderState = () => {
     // Inicia una nueva orden vacía. Limpia los campos
     const handleNewOrder = (resetAddressState) => {
         setOrderData({                      // Limpia info general
+            customerId: '',
             customerName: '',
+            employeeId: '',
             employeeName: '',
             orderDate: ''
         });
@@ -39,13 +41,50 @@ const useOrderState = () => {
         setIsEditing(false);
     };
 
-    // Actualiza un campo general del formulario (customerName, orderDate...).
+    // Actualiza un campo general del formulario (customerName, orderDate...). 
+    // No es suficiente para capturar el ID desde e.target.value porque <option> no emite un click
+    // que podamos interceptar directamente. Asi que no extraemos el id de la opcion con esta funcion.
     const handleOrderInfoChange = (e) => {
         const { name, value } = e.target;
         setOrderData(prev => ({
             ...prev,
             [name]: value
         }));
+    };
+
+    /**
+    * Cuando seleccionamos un cliente del dropdown.
+    */
+    const handleSelectCustomer = (id, name) => {
+        setOrderData(prev => ({
+            ...prev,
+            customerId: id,
+            customerName: name
+        }));
+    };
+
+    /**
+    * Cuando seleccionamos un empleado del dropdown.
+    */
+    const handleSelectEmployee = (id, name) => {
+        setOrderData((prev) => ({
+            ...prev,
+            employeeId: id,
+            employeeName: name
+        }));
+    };
+
+    /**
+    * Cuando seleccionamos un producto desde un detalle.
+    */
+    const handleSelectProduct = (index, productId, name, unitPrice) => {
+        setOrderDetails((prev) =>
+            prev.map((detail, idx) =>
+                idx === index
+                    ? { ...detail, productId, productName: name, unitPrice }
+                    : detail
+            )
+        );
     };
 
     // Agrega una nueva línea vacía al detalle de la orden.
@@ -93,7 +132,7 @@ const useOrderState = () => {
         handleNewOrder,
         handleEditOrder,
         handleCancelEdit,
-        handleOrderInfoChange,
+        handleOrderInfoChange,  //remover este
         handleAddDetail,
         handleEditDetail,
         handleDeleteDetail,
@@ -102,6 +141,9 @@ const useOrderState = () => {
         setHasNextOrder,
         hasPreviousOrder,
         setHasPreviousOrder,
+        handleSelectCustomer,
+        handleSelectEmployee,
+        handleSelectProduct,
     };
 };
 

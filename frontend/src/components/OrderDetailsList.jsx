@@ -2,7 +2,16 @@ import React from 'react';
 import calculateTotal from '../utils/calculateTotal';
 
 
-const OrderDetailsList = ({ details, onAddDetail, onEditDetail, onDeleteDetail, isEditing, products, loadProducts }) => {
+const OrderDetailsList = ({
+  details,
+  onAddDetail,
+  onEditDetail,
+  onDeleteDetail,
+  onSelectProduct,
+  isEditing,
+  products,
+  loadProducts }) => {
+
   return (
     <div className="mb-6">
       <div className="flex justify-between items-center bg-gray-300 p-3 rounded mb-2">
@@ -33,7 +42,7 @@ const OrderDetailsList = ({ details, onAddDetail, onEditDetail, onDeleteDetail, 
                       type="text"
                       value={detail.productName}
                       placeholder="Search product"
-                      onChange={(e) => {
+                      /*onChange={(e) => {
                         const value = e.target.value;
                         onEditDetail(index, 'productName', value);
 
@@ -41,6 +50,16 @@ const OrderDetailsList = ({ details, onAddDetail, onEditDetail, onDeleteDetail, 
                         const match = products.find(p => p.productName === value);
                         if (match) {
                           onEditDetail(index, 'unitPrice', match.unitPrice);
+                        }
+                      }}*/
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        onEditDetail(index, 'productName', value);
+
+                        const match = products.find(p => p.productName === value);
+                        if (match) {
+                          onEditDetail(index, 'unitPrice', match.unitPrice);
+                          onSelectProduct(index, match.id, match.productName, match.unitPrice);
                         }
                       }}
                       onFocus={loadProducts}

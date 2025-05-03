@@ -87,17 +87,37 @@ const useAddress = () => {
   /**
    * Extrae partes importantes desde address_components
    */
-  const extractAddressParts = (components) => {
-    const get = (type) =>
-      components.find((c) => c.types.includes(type))?.long_name || '';
+  /*const extractAddressParts = (components) => {
+    const get = (type, useShort = false) =>
+      components.find((c) => c.types.includes(type))?.[useShort ? 'short_name' : 'long_name'] || '';
 
     return {
       street: `${get('street_number')} ${get('route')}`.trim(),
       city: get('locality'),
-      state: get('administrative_area_level_1'),
+      state: get('administrative_area_level_1', true),
       postalCode: get('postal_code'),
       country: get('country'),
     };
+  };*/
+
+  const extractAddressParts = (components) => {
+    return {
+      street: `${getNameWithinLimit(components, 'street_number', 60)} ${getNameWithinLimit(components, 'route', 60)}`.trim(),
+      city: getNameWithinLimit(components, 'locality', 15),
+      state: getNameWithinLimit(components, 'administrative_area_level_1', 15),
+      postalCode: getNameWithinLimit(components, 'postal_code', 10),
+      country: getNameWithinLimit(components, 'country', 15),
+    };
+  };
+
+  const getNameWithinLimit = (components, type, limit) => {
+    const match = components.find((c) => c.types.includes(type));
+    if (!match) return '';
+    const { long_name, short_name } = match;
+
+    if (long_name && long_name.length <= limit) return long_name;
+    if (short_name && short_name.length <= limit) return short_name;
+    return ''; // ambos inválidos
   };
 
   const resetAddressState = () => {
@@ -112,7 +132,7 @@ const useAddress = () => {
       country: '',
     });
   };
-  
+
 
   // Alias por compatibilidad
   const updateMapCoordinates = validateAddressWithGeocoding;

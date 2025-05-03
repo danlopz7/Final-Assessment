@@ -37,6 +37,9 @@ const OrdersPage = () => {
     handleAddDetail,
     handleEditDetail,
     handleDeleteDetail,
+    handleSelectCustomer,
+    handleSelectEmployee,
+    handleSelectProduct,
 
     // Dirección (Autocomplete / Geocoding)
     handleSelectAddress,
@@ -73,8 +76,10 @@ const OrdersPage = () => {
         isEditing={isEditing}
         isAddressValid={isAddressValid}
         onChangeOrder={handleOrderInfoChange}
-        onSelectAddress={handleSelectAddress}
+        onSelectAddress={handleSelectAddress}   //HANDLE SELECT ADDRESS
         onValidateAddress={validateAddressWithGeocoding}
+        onSelectCustomer={handleSelectCustomer}  // ✅ Agrega este
+        onSelectEmployee={handleSelectEmployee}
       />
 
       {/* Lista de productos */}
@@ -83,6 +88,7 @@ const OrdersPage = () => {
         onAddDetail={handleAddDetail}
         onEditDetail={handleEditDetail}
         onDeleteDetail={handleDeleteDetail}
+        onSelectProduct={handleSelectProduct}
         isEditing={isEditing}
         products={products}
         loadProducts={loadProducts}

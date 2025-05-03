@@ -10,6 +10,8 @@ const OrderInfo = ({
   onChangeOrder,
   isEditing,
   isAddressValid,
+  onSelectCustomer,
+  onSelectEmployee,
 }) => {
   const autocompleteRef = useRef(null);
   const [localAddress, setLocalAddress] = useState(shippingAddressString);
@@ -65,9 +67,18 @@ const OrderInfo = ({
                 type="text"
                 name="customerName"
                 placeholder="Search customer"
-                value={orderData.customerName || ''}
-                onChange={onChangeOrder}
-                onFocus={loadCustomers}
+                value={orderData.customerName || ''}  // pone el valor que extrae de la data
+                //onChange={onChangeOrder}  // guarda el estado por cada cambio en textbox
+                onChange={(e) => {
+                  const value = e.target.value;
+                  onChangeOrder(e);
+
+                  const match = customers.find(c => c.contactName === value);
+                  if (match) {
+                    onSelectCustomer(match.id, match.contactName);
+                  }
+                }}
+                onFocus={loadCustomers} //carga customers cuando se da click al textbox
                 list="customer-options"
                 className="border rounded p-2 w-full"
               />
@@ -150,7 +161,16 @@ const OrderInfo = ({
                 name="employeeName"
                 placeholder="Search employee"
                 value={orderData.employeeName || ''}
-                onChange={onChangeOrder}
+                //onChange={onChangeOrder}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  onChangeOrder(e);
+              
+                  const match = employees.find(emp => emp.fullName === value);
+                  if (match) {
+                    onSelectEmployee(match.id, match.fullName);
+                  }
+                }}
                 onFocus={loadEmployees}
                 list="employee-options"
                 className="border rounded p-2 w-full"

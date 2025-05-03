@@ -34,11 +34,7 @@ const useOrderData = () => {
     address.updateMapCoordinates(formattedAddress);
   };
 
-  /* const handleNextOrder = () => {
-    if (orderState.orderData?.orderId) {
-      crud.loadNextOrder(orderState.orderData.orderId);
-    }
-  }; */
+  
 
   const handleNextOrder = async () => {
     if (!orderState.orderData?.orderId) return;
@@ -53,11 +49,7 @@ const useOrderData = () => {
     address.updateMapCoordinates(formattedAddress);
   };
 
-  /* const handlePreviousOrder = () => {
-    if (orderState.orderData?.orderId) {
-      crud.loadPreviousOrder(orderState.orderData.orderId);
-    }
-  }; */
+  
 
   const handlePreviousOrder = async () => {
     if (!orderState.orderData?.orderId) return;
@@ -90,13 +82,14 @@ const useOrderData = () => {
     handleEditOrder: orderState.handleEditOrder,                                            /** Activa el modo edición */
     handleCancelEdit: () => orderState.handleCancelEdit(address.setShippingAddressString),  /** Cancela la edición y restaura los valores originales */
 
-    handleSaveOrder: () =>
-      crud.handleSaveOrder(
-        orderState.orderData,
-        orderState.orderDetails,
-        address.shippingAddressString,
-        () => orderState.setIsEditing(false)
-      ),                                                                /** Guarda la orden actual (crear o actualizar) */
+                                                             /** Guarda la orden actual (crear o actualizar) */
+
+    handleSaveOrder: () => crud.handleSaveOrder(
+      orderState.orderData,
+      orderState.orderDetails,
+      address.parsedAddressFields,   // Usa campos desglosados (no un string)
+      () => orderState.setIsEditing(false)
+    ),
 
     handleDeleteOrder: crud.handleDeleteOrder,                          /** Elimina la orden actual (simulado) */
     /* handleDeleteOrder: () => {
@@ -114,6 +107,7 @@ const useOrderData = () => {
     handleAddDetail: orderState.handleAddDetail,                        /** Agrega un nuevo detalle de producto vacío */
     handleEditDetail: orderState.handleEditDetail,                      /** Edita un valor de un detalle (producto, cantidad, precio) */
     handleDeleteDetail: orderState.handleDeleteDetail,                  /** Elimina una línea del detalle de orden */
+    handleSelectProduct: orderState.handleSelectProduct,
 
     // Dirección
     handleSelectAddress: address.handleSelectAddress,                   /** Actualiza dirección manualmente (al escribir) o selecciona desde Autocomplete */
@@ -124,8 +118,32 @@ const useOrderData = () => {
     handleNextOrder,
     hasNextOrder: orderState.hasNextOrder,
     hasPreviousOrder: orderState.hasPreviousOrder,
+    handleSelectCustomer: orderState.handleSelectCustomer,
+    handleSelectEmployee: orderState.handleSelectEmployee,
 
   };
 };
 
 export default useOrderData;
+
+
+/* const handleNextOrder = () => {
+    if (orderState.orderData?.orderId) {
+      crud.loadNextOrder(orderState.orderData.orderId);
+    }
+  }; */
+
+
+  /* const handlePreviousOrder = () => {
+    if (orderState.orderData?.orderId) {
+      crud.loadPreviousOrder(orderState.orderData.orderId);
+    }
+  }; */
+
+  /*handleSaveOrder: () =>
+      crud.handleSaveOrder(
+        orderState.orderData,
+        orderState.orderDetails,
+        address.shippingAddressString,
+        () => orderState.setIsEditing(false)
+      ),    */   

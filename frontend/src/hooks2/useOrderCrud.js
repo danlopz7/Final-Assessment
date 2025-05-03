@@ -1,5 +1,12 @@
 import { useCallback } from 'react';
-import { fetchFirstOrder, fetchOrderById, fetchNextOrder, fetchPreviousOrder } from '../api/ordersApi';
+import {
+  fetchFirstOrder,
+  fetchOrderById,
+  fetchNextOrder,
+  fetchPreviousOrder,
+  createOrder,
+  updateOrder
+} from '../api/ordersApi';
 
 /**
  * Hook para manejar operaciones CRUD relacionadas con las órdenes.
@@ -65,31 +72,87 @@ const useOrderCrud = ({
     return mapBackendData(data);
   };
 
-  // Guarda una orden (crear o actualizar). Simulado por ahora.
-  const handleSaveOrder = async (orderData, orderDetails, shippingAddressString, onDone) => {
+  /**
+   * Guarda una orden (crear o actualizar).
+   */
+  const saveOrder = async (payload) => {
+    if (!payload) return;
+    const isNew = !payload.orderId;
+
+    if (isNew) {
+      await createOrder(payload);
+      console.log('Orden creada');
+    } else {
+      await updateOrder(payload.orderId, payload);
+      console.log('Orden actualizada');
+    }
+  };
+
+  const handleSaveOrder = async (orderData, orderDetails, parsedAddressFields, onDone) => {
+    if (!orderData || !parsedAddressFields) {
+      console.warn("Faltan datos requeridos para guardar");
+      //return;
+    }
+
+    /*const errors = [];
+
+    if (!orderData.orderDate) errors.push("Order date is required");
+    if (!orderData.customerId) errors.push("Customer must be selected");
+    if (!orderData.employeeId) errors.push("Employee must be selected");
+
+    const addr = parsedAddressFields;
+    if (!addr.street || !addr.city || !addr.postalCode || !addr.country) {
+      errors.push("Complete shipping address is required");
+    }
+
+    if (!orderDetails.length) {
+      errors.push("At least one order detail is required");
+    }
+
+    const invalidDetail = orderDetails.find(d => !d.productId || d.quantity <= 0);
+    if (invalidDetail) {
+      errors.push("Each order detail must have a valid product and quantity");
+    }
+
+    if (errors.length) {
+      console.warn("❌ Validation failed:", errors);
+      alert("Cannot save order:\n" + errors.join("\n"));
+      return;
+    }*/
+
     const payload = {
-      customer: { contactName: orderData.customerName },
-      employee: { name: orderData.employeeName },
-      shippingAddress: shippingAddressString,
+      orderId: orderData.orderId || null,
       orderDate: orderData.orderDate,
-      orderDetails,
-      // orderDetails: orderDetails.map(detail => ({
-      //   productName: detail.productName,
-      //   quantity: detail.quantity,
-      //   unitPrice: detail.unitPrice,
-      // })),
+      customer: { id: orderData.customerId },
+      employee: { id: orderData.employeeId },
+      shippingAddress: {
+        shipAddress: parsedAddressFields.street,
+        shipCity: parsedAddressFields.city,
+        shipRegion: parsedAddressFields.state || null,
+        shipPostalCode: parsedAddressFields.postalCode,
+        shipCountry: parsedAddressFields.country
+      },
+      orderDetails: orderDetails.map(d => ({
+        product: { id: d.productId },
+        quantity: Number(d.quantity)
+      }))
     };
 
-    // if (orderData.orderId) {
-    //   await updateOrder(orderData.orderId, payload);
-    // } else {
-    //   await createOrder(payload);
-    // }
+    console.log("Payload listo para guardar:", payload);
 
-    console.log("Simulando guardar:", payload);
-    onDone?.();
-    //setIsEditing(false); (pendiente)
-    loadInitialOrder(); // Cargar la orden que guardamos (pendiente)
+    try {
+      if (orderData.orderId) {
+        await updateOrder(orderData.orderId, payload);
+        console.log("Orden actualizada con éxito.");
+      } else {
+        await createOrder(payload);
+        console.log("Nueva orden creada con éxito.");
+      }
+
+      onDone?.();
+    } catch (error) {
+      console.error("Error al guardar orden:", error);
+    }
   };
 
   // Elimina una orden. Simulado.
@@ -146,9 +209,40 @@ const useOrderCrud = ({
     loadPreviousOrder,
     mapBackendData,
     handleSaveOrder,
+    saveOrder,
     handleDeleteOrder,
     handleGenerateReport,
   };
 };
 
 export default useOrderCrud;
+
+
+
+// Guarda una orden (crear o actualizar). Simulado por ahora.
+/*const handleSaveOrder = async (orderData, orderDetails, shippingAddressString, onDone) => {
+  const payload = {
+    customer: { contactName: orderData.customerName },
+    employee: { name: orderData.employeeName },
+    shippingAddress: shippingAddressString,
+    orderDate: orderData.orderDate,
+    orderDetails,
+    // orderDetails: orderDetails.map(detail => ({
+    //   productName: detail.productName,
+    //   quantity: detail.quantity,
+    //   unitPrice: detail.unitPrice,
+    // })),
+  };
+
+  // if (orderData.orderId) {
+  //   await updateOrder(orderData.orderId, payload);
+  // } else {
+  //   await createOrder(payload);
+  // }
+
+  console.log("Simulando guardar:", payload);
+  onDone?.();
+  //setIsEditing(false); (pendiente)
+  loadInitialOrder(); // Cargar la orden que guardamos (pendiente)
+};*/
+
