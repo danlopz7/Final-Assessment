@@ -4,7 +4,7 @@ This project is a full-stack Order Management System consisting of a **React fro
 
 ---
 
-## 🧰 Backend (.NET 7 Web API)
+## 🧰 Backend (.NET 9 Web API)
 
 ### Project Structure
 
@@ -42,13 +42,16 @@ This project is a full-stack Order Management System consisting of a **React fro
 ```
 /frontend
 ├── components
-│   ├── OrderInfo.jsx           // Customer, employee, date, and address
+│   ├── OrderActions.jsx        // New, Save, Previous, Next buttons
 │   ├── OrderDetailsList.jsx    // Line items with product selection and prices
-│   └── ShippingMap.jsx         // Shows validated address with Google Maps
-├── hooks
-│   ├── useOrderState.js
+│   ├── OrderInfo.jsx           // Customer, employee, date, and address
+│   └── OrderMap.jsx            // Shows validated address with Google Maps
+├── hooks2
+│   ├── useAddress.js
 │   ├── useOrderCrud.js
-│   └── useAddressValidation.js
+│   ├── useOrderData.js
+│   ├── useOrderOptions.js
+│   └── useOrderState.js
 ├── pages
 │   └── OrderManagement.jsx
 ├── App.jsx
@@ -115,7 +118,7 @@ When the user loads the UI:
 
 ```json
 {
-  "customerId": 3,
+  "customerId": "ALFKI",
   "employeeId": 5,
   "orderDate": "2025-05-03",
   "shippingAddress": {
@@ -153,15 +156,6 @@ When the user loads the UI:
 - **Frontend:** React, Tailwind CSS, Google Maps JavaScript API
 - **Backend:** ASP.NET Core Web API, Entity Framework Core
 - **Database:** SQL Server (code-first migrations supported)
-
----
-
-## 🚫 Future Enhancements
-
-- JWT authentication for protected routes.
-- Pagination & search in orders list.
-- Delete order functionality.
-- Optimistic UI updates with error fallback.
 
 ---
 
