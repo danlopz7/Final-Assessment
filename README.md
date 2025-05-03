@@ -4,7 +4,7 @@ This project is a full-stack Order Management System consisting of a **React fro
 
 ---
 
-## 🧰 Backend (.NET 7 Web API)
+## 🧰 Backend (.NET 9 Web API)
 
 ### Project Structure
 
