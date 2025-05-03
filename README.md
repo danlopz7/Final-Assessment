@@ -2,7 +2,7 @@
 
 This project is a full-stack Order Management System consisting of a **React frontend** and a **.NET backend**. It enables creating, viewing, and editing customer orders that include employee assignments, products, and validated shipping addresses.
 
-DEMO: https://youtu.be/PfaEgoKW1vE
+DEMO: https://youtu.be/eI-94kTAxaY
 
 ---
 
