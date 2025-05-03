@@ -159,8 +159,26 @@ When the user loads the UI:
 
 ---
 
-Feel free to contribute or raise issues. Happy coding!
+## 🗂️ Database Schema
+
+![Order Management Database Schema](./backend/db-schema.png)
+
+This schema illustrates the relational structure between the main entities:
+
+- **Orders** links:
+  - To **Customers** via `CustomerID`
+  - To **Employees** via `EmployeeID`
+  - To **Shippers** via `ShipVia`
+- **OrderDetails** is a junction table between **Orders** and **Products**
+  - Composite primary key: `OrderID` + `ProductID`
+  - Includes `UnitPrice`, `Quantity`, and optional `Note`
+- **Products** are reusable items across orders
+- **Employees** and **Customers** contain personal and contact details
+
+This normalized model ensures data consistency and enables efficient querying.
 
 ---
 
 ✨ *Created as part of Final Assessment*
+
+---
