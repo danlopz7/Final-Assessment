@@ -91,7 +91,7 @@ const useOrderState = () => {
     const handleAddDetail = () => {
         setOrderDetails(prev => [
             ...prev,
-            { productName: '', quantity: 0, unitPrice: 0 }]);
+            { productId: '', productName: '', quantity: 0, unitPrice: 0 }]);
     };
 
     // Edita un campo dentro de una línea del detalle.

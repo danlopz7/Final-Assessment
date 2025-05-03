@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import useOrderCrud from './useOrderCrud';
 import useOrderState from './useOrderState';
 import useAddress from './useAddress';
-import { fetchOrderById, fetchNextOrder, fetchPreviousOrder } from '../api/ordersApi';
 
 /**
  * Hook principal que integra estado, lógica de dirección y operaciones CRUD.
@@ -31,10 +30,8 @@ const useOrderData = () => {
 
     orderState.applyLoadedOrder(formattedOrderData, formattedDetails, formattedAddress);
     address.setShippingAddressString(formattedAddress);
-    address.updateMapCoordinates(formattedAddress);
+    address.validateAddressWithGeocoding(formattedAddress);
   };
-
-  
 
   const handleNextOrder = async () => {
     if (!orderState.orderData?.orderId) return;
@@ -46,10 +43,8 @@ const useOrderData = () => {
 
     orderState.applyLoadedOrder(formattedOrderData, formattedDetails, formattedAddress);
     address.setShippingAddressString(formattedAddress);
-    address.updateMapCoordinates(formattedAddress);
+    address.validateAddressWithGeocoding(formattedAddress);
   };
-
-  
 
   const handlePreviousOrder = async () => {
     if (!orderState.orderData?.orderId) return;
@@ -61,7 +56,7 @@ const useOrderData = () => {
 
     orderState.applyLoadedOrder(formattedOrderData, formattedDetails, formattedAddress);
     address.setShippingAddressString(formattedAddress);
-    address.updateMapCoordinates(formattedAddress);
+    address.validateAddressWithGeocoding(formattedAddress);
   };
 
   return {
@@ -81,22 +76,40 @@ const useOrderData = () => {
     handleNewOrder: () => orderState.handleNewOrder(address.resetAddressState),             /** Crea una nueva orden en blanco */
     handleEditOrder: orderState.handleEditOrder,                                            /** Activa el modo edición */
     handleCancelEdit: () => orderState.handleCancelEdit(address.setShippingAddressString),  /** Cancela la edición y restaura los valores originales */
-
-                                                             /** Guarda la orden actual (crear o actualizar) */
-
-    handleSaveOrder: () => crud.handleSaveOrder(
+    handleSaveOrder: () => crud.handleSaveOrder(                                            /** Guarda la orden actual (crear o actualizar) */
       orderState.orderData,
       orderState.orderDetails,
       address.parsedAddressFields,   // Usa campos desglosados (no un string)
-      () => orderState.setIsEditing(false)
+      ({ formattedOrderData, formattedDetails, formattedAddress }) => {
+        orderState.applyLoadedOrder(formattedOrderData, formattedDetails, formattedAddress);
+        address.setShippingAddressString(formattedAddress);
+        address.validateAddressWithGeocoding(formattedAddress); // actualiza mapa
+        orderState.setIsEditing(false);
+      }
     ),
 
-    handleDeleteOrder: crud.handleDeleteOrder,                          /** Elimina la orden actual (simulado) */
-    /* handleDeleteOrder: () => {
-      console.log('Simulando eliminar orden'); // Puedes luego conectar deleteOrder aquí
-      loadInitialOrder();
-    }, */
-
+    handleDeleteOrder: async () => {
+      const orderId = orderState.orderData?.orderId;
+    
+      if (!orderId) return;
+    
+      const result = await crud.handleDeleteOrder(orderId);
+    
+      if (result?.formattedOrderData) {
+        orderState.applyLoadedOrder(
+          result.formattedOrderData,
+          result.formattedDetails,
+          result.formattedAddress
+        );
+        address.setShippingAddressString(result.formattedAddress);
+        address.validateAddressWithGeocoding(result.formattedAddress);
+      } else {
+        // Si no hay órdenes restantes
+        orderState.setOrderData(null);
+        orderState.setOrderDetails([]);
+        address.resetAddressState();
+      }
+    },
 
     handleGenerateReport: crud.handleGenerateReport,                    /** Genera un PDF de la orden actual (simulado) */
     handleGenerateReport: () => {
@@ -125,25 +138,3 @@ const useOrderData = () => {
 };
 
 export default useOrderData;
-
-
-/* const handleNextOrder = () => {
-    if (orderState.orderData?.orderId) {
-      crud.loadNextOrder(orderState.orderData.orderId);
-    }
-  }; */
-
-
-  /* const handlePreviousOrder = () => {
-    if (orderState.orderData?.orderId) {
-      crud.loadPreviousOrder(orderState.orderData.orderId);
-    }
-  }; */
-
-  /*handleSaveOrder: () =>
-      crud.handleSaveOrder(
-        orderState.orderData,
-        orderState.orderDetails,
-        address.shippingAddressString,
-        () => orderState.setIsEditing(false)
-      ),    */   

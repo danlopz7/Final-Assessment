@@ -18,7 +18,6 @@ namespace backend.Services.Interfaces
         Task<bool> ExistsOrderBeforeAsync(int currentId);
         Task<OrderDto> CreateOrderAsync(OrderInputDto dto);
         Task<OrderDto> CreateOrUpdateOrderAsync(OrderInputDto dto);
-
-        
+        Task<bool> DeleteOrderAsync(int id);
     }
 }

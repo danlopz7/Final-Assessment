@@ -10,9 +10,7 @@ namespace backend.Repositories.Interfaces
     {
         Task<Order> GetFirstOrderAsync();
         Task<Order> GetOrderByIdAsync(int id);
-
         Task AddOrderAsync(Order order);
-
         Task<Order?> GetNextOrderAsync(int currentId);
         Task<Order?> GetPreviousOrderAsync(int currentId);
         Task<bool> ExistsOrderAfter(int currentId);
@@ -20,10 +18,8 @@ namespace backend.Repositories.Interfaces
 
         Task<Order> GetOrderByIdWithDetailsAsync(int id);
         Task UpdateOrderAsync(Order order);
+        Task DeleteOrderAsync(int id);
 
         //Task<IEnumerable<Order>> GetAllOrdersAsync();
-
-        //Task UpdateOrderAsync(Order order);
-        //Task DeleteOrderAsync(int id);
     }
 }

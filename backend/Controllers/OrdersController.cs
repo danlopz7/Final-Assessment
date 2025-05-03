@@ -44,20 +44,23 @@ namespace backend.Controllers
             return Ok(result);
         }
 
-        /* // POST /api/orders
-        [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] OrderInputDto dto)
-        {
-            var created = await _orderService.CreateOrderAsync(dto);
-            return CreatedAtAction(nameof(GetOrderById), new { id = created.OrderId }, created);
-        } */
-
         // POST /api/orders
         [HttpPost]
         public async Task<IActionResult> CreateOrUpdateOrder([FromBody] OrderInputDto dto)
         {
             var result = await _orderService.CreateOrUpdateOrderAsync(dto);
             return Ok(result);
+        }
+
+        // DELETE /api/orders/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteOrder(int id)
+        {
+            var success = await _orderService.DeleteOrderAsync(id);
+            if (!success)
+                return NotFound();
+
+            return NoContent(); // 204 No Content
         }
 
         private async Task<NavigationResultDto> BuildNavigationResult(int orderId, OrderDto order)

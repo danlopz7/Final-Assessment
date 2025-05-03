@@ -6,7 +6,6 @@ const OrderInfo = ({
   orderData,
   shippingAddressString,
   onSelectAddress,
-  onValidateAddress,
   onChangeOrder,
   isEditing,
   isAddressValid,
@@ -33,23 +32,14 @@ const OrderInfo = ({
     if (place && place.formatted_address && place.geometry &&
       place.geometry.location) {
 
-      const formattedAddress = place.formatted_address;       // Evita errores por nombres inconsistentes
+      const formattedAddress = place.formatted_address;         // Evita errores por nombres inconsistentes
       const lat = place.geometry.location.lat();
       const lng = place.geometry.location.lng();
-      const components = place.address_components;            // desglosar la dirección
+      const components = place.address_components;              // desglosar la dirección
 
-      //setLocalAddress(formattedAddress);                    // reflejar en el input ??
-      onSelectAddress(formattedAddress, lat, lng, components);
-      //onSelectAddress(formattedAddress, lat, lng);        // sincronizar con hook principal
+      onSelectAddress(formattedAddress, lat, lng, components);  // sincronizar con hook principal
     } else {
       console.warn("Place no válido:", place);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      onValidateAddress(shippingAddressString);
     }
   };
 
@@ -72,13 +62,12 @@ const OrderInfo = ({
                 onChange={(e) => {
                   const value = e.target.value;
                   onChangeOrder(e);
-
                   const match = customers.find(c => c.contactName === value);
                   if (match) {
                     onSelectCustomer(match.id, match.contactName);
                   }
                 }}
-                onFocus={loadCustomers} //carga customers cuando se da click al textbox
+                onFocus={loadCustomers}   //carga customers cuando se da click al textbox
                 list="customer-options"
                 className="border rounded p-2 w-full"
               />
@@ -128,19 +117,19 @@ const OrderInfo = ({
                   //value={shippingAddressString}
                   //onChange={(e) => onSelectAddress(e.target.value)}
                   onChange={(e) => {
-                    setLocalAddress(e.target.value);
-                    onSelectAddress(e.target.value); // manda cambio hacia arriba
+                    const value = e.target.value;
+                    setLocalAddress(value);
+                    onSelectAddress(value); // valida con Geocoding al escribir
                   }}
-                  onKeyDown={handleKeyDown}
                   className="border rounded p-2 w-full pr-10"
                 />
               </Autocomplete>
+              {isAddressValid === false || (isAddressValid === null && localAddress.trim() !== '') ? (
+                <span className="absolute right-2 top-2 text-red-500">❌</span>
+              ) : null}
 
               {isAddressValid === true && (
                 <span className="absolute right-2 top-2 text-green-600">✔️</span>
-              )}
-              {isAddressValid === false && (
-                <span className="absolute right-2 top-2 text-red-500">❌</span>
               )}
             </div>
           ) : (
@@ -165,7 +154,7 @@ const OrderInfo = ({
                 onChange={(e) => {
                   const value = e.target.value;
                   onChangeOrder(e);
-              
+
                   const match = employees.find(emp => emp.fullName === value);
                   if (match) {
                     onSelectEmployee(match.id, match.fullName);

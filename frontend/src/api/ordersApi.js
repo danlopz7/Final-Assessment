@@ -22,7 +22,7 @@ export const fetchFirstOrder = async () => {
   return response.data;
 };
 
-export const createOrder = async (payload) => {
+export const createOrUpdateOrder = async (payload) => {
   const response = await axios.post(ORDERS_URL, payload);
   return response.data;
 };

@@ -72,13 +72,13 @@ const OrdersPage = () => {
       {/* Info principal de la orden */}
       <OrderInfo
         orderData={orderData}
-        shippingAddressString={shippingAddressString}
+        shippingAddressString={shippingAddressString}   // Viene del hook useAddress
         isEditing={isEditing}
         isAddressValid={isAddressValid}
         onChangeOrder={handleOrderInfoChange}
-        onSelectAddress={handleSelectAddress}   //HANDLE SELECT ADDRESS
+        onSelectAddress={handleSelectAddress}   //HANDLE SELECT ADDRESS useOrderData
         onValidateAddress={validateAddressWithGeocoding}
-        onSelectCustomer={handleSelectCustomer}  // ✅ Agrega este
+        onSelectCustomer={handleSelectCustomer} 
         onSelectEmployee={handleSelectEmployee}
       />
 

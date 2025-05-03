@@ -58,7 +58,7 @@ namespace backend.Services
         // endpoint to save data from the UI
         public async Task<OrderDto> CreateOrderAsync(OrderInputDto dto)
         {
-            // 1. Validar existencia de Customer y Employee
+            // Valido existencia de Customer y Employee
             var customer = await _customerRepository.FindByIdAsync(dto.Customer.Id);
             if (customer == null)
                 throw new Exception($"Customer with ID {dto.Customer.Id} not found.");
@@ -67,7 +67,7 @@ namespace backend.Services
             if (employee == null)
                 throw new Exception($"Employee with ID {dto.Employee.Id} not found.");
 
-            // 2. Crear la entidad Order
+            // Creo entidad Order
             var order = new Order
             {
                 OrderDate = dto.OrderDate ?? DateTime.UtcNow,
@@ -81,7 +81,7 @@ namespace backend.Services
                 OrderDetails = new List<OrderDetail>(),
             };
 
-            // 3. Construir OrderDetails
+            // Construir OrderDetails
             foreach (var detailDto in dto.OrderDetails)
             {
                 var product = await _productRepository.FindByIdAsync(detailDto.Product.Id);
@@ -98,10 +98,13 @@ namespace backend.Services
                 );
             }
 
-            // 4. Guardar en la base de datos
+            // Guardar en la base
             await _orderRepository.AddOrderAsync(order);
 
-            // 5. Retornar como OrderDto usando método de mapeo
+            // Recargar orden completa desde DB (con relaciones)
+            var saved = await _orderRepository.GetOrderByIdWithDetailsAsync(order.OrderId);
+
+            // Retornar como OrderDto usando método de mapeo
             return MapOrderToDto(order);
         }
 
@@ -135,7 +138,7 @@ namespace backend.Services
                     {
                         ProductId = product.ProductId,
                         Quantity = detailDto.Quantity,
-                        UnitPrice = product.UnitPrice ?? 0
+                        UnitPrice = product.UnitPrice ?? 0,
                     }
                 );
             }
@@ -143,6 +146,16 @@ namespace backend.Services
             await _orderRepository.UpdateOrderAsync(order);
 
             return MapOrderToDto(order);
+        }
+
+        public async Task<bool> DeleteOrderAsync(int id)
+        {
+            var order = await _orderRepository.GetOrderByIdAsync(id);
+            if (order == null)
+                return false;
+
+            await _orderRepository.DeleteOrderAsync(id);
+            return true;
         }
 
         public async Task<OrderDto> GetNextOrderAsync(int id)
@@ -212,43 +225,3 @@ namespace backend.Services
 }
 
 
-
-/* public async Task<OrderDto> GetOrderByIdAsync(int id)
-        {
-            var order = await _orderRepository.GetOrderByIdAsync(id);
-
-            if (order == null)
-                return null;
-
-            return new OrderDto
-            {
-                OrderId = order.OrderId,
-                OrderDate = order.OrderDate,
-                Customer = new CustomerSimpleDto { ContactName = order.Customer?.ContactName },
-                ShippingAddress = new ShippingAddressDto
-                {
-                    ShipAddress = order.ShipAddress,
-                    ShipCity = order.ShipCity,
-                    ShipRegion = order.ShipRegion,
-                    ShipPostalCode = order.ShipPostalCode,
-                    ShipCountry = order.ShipCountry,
-                },
-                Employee = new EmployeeSimpleDto
-                {
-                    FirstName = order.Employee?.FirstName,
-                    LastName = order.Employee?.LastName,
-                },
-                OrderDetails = order
-                    .OrderDetails?.Select(od => new OrderDetailDto
-                    {
-                        Product = new ProductSimpleDto
-                        {
-                            ProductName = od.Product?.ProductName,
-                            UnitPrice = od.Product?.UnitPrice,
-                        },
-                        Quantity = od.Quantity,
-                    })
-                    .ToList(),
-            };
-        }
- */

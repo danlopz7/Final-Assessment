@@ -4,8 +4,9 @@ import {
   fetchOrderById,
   fetchNextOrder,
   fetchPreviousOrder,
-  createOrder,
-  updateOrder
+  createOrUpdateOrder,
+  updateOrder,
+  deleteOrder
 } from '../api/ordersApi';
 
 /**
@@ -26,7 +27,9 @@ const useOrderCrud = ({
 
     const formattedOrderData = {
       orderId: data.orderId,
+      customerId: customer.id,
       customerName: customer.contactName,
+      employeeId: employee.id, 
       employeeName: employee.fullName,
       orderDate: new Date(data.orderDate).toISOString().split('T')[0],
     };
@@ -36,6 +39,7 @@ const useOrderCrud = ({
       .trim();
 
     const formattedDetails = orderDetails.map((detail) => ({
+      productId: detail.product.id,
       productName: detail.product.productName,
       unitPrice: detail.product.unitPrice,
       quantity: detail.quantity,
@@ -68,8 +72,19 @@ const useOrderCrud = ({
    * Carga una orden por ID.
    */
   const loadOrder = async (orderId) => {
-    const data = await fetchOrderById(orderId);
-    return mapBackendData(data);
+    //const data = await fetchOrderById(orderId);
+    /* const { order, hasNext, hasPrevious } = await fetchOrderById(orderId);
+    return mapBackendData(order); */
+    try {
+      const { order, hasNext, hasPrevious } = await fetchOrderById(orderId);
+      if (order) {
+        setHasNextOrder(hasNext);
+        setHasPreviousOrder(hasPrevious);
+        return mapBackendData(order);
+      }
+    } catch (error) {
+      console.error('Error al cargar la primera orden:', error);
+    }
   };
 
   /**
@@ -80,7 +95,7 @@ const useOrderCrud = ({
     const isNew = !payload.orderId;
 
     if (isNew) {
-      await createOrder(payload);
+      await createOrUpdateOrder(payload);
       console.log('Orden creada');
     } else {
       await updateOrder(payload.orderId, payload);
@@ -91,34 +106,8 @@ const useOrderCrud = ({
   const handleSaveOrder = async (orderData, orderDetails, parsedAddressFields, onDone) => {
     if (!orderData || !parsedAddressFields) {
       console.warn("Faltan datos requeridos para guardar");
-      //return;
-    }
-
-    /*const errors = [];
-
-    if (!orderData.orderDate) errors.push("Order date is required");
-    if (!orderData.customerId) errors.push("Customer must be selected");
-    if (!orderData.employeeId) errors.push("Employee must be selected");
-
-    const addr = parsedAddressFields;
-    if (!addr.street || !addr.city || !addr.postalCode || !addr.country) {
-      errors.push("Complete shipping address is required");
-    }
-
-    if (!orderDetails.length) {
-      errors.push("At least one order detail is required");
-    }
-
-    const invalidDetail = orderDetails.find(d => !d.productId || d.quantity <= 0);
-    if (invalidDetail) {
-      errors.push("Each order detail must have a valid product and quantity");
-    }
-
-    if (errors.length) {
-      console.warn("❌ Validation failed:", errors);
-      alert("Cannot save order:\n" + errors.join("\n"));
       return;
-    }*/
+    }
 
     const payload = {
       orderId: orderData.orderId || null,
@@ -138,31 +127,62 @@ const useOrderCrud = ({
       }))
     };
 
-    console.log("Payload listo para guardar:", payload);
+    console.log(payload);
 
     try {
-      if (orderData.orderId) {
-        await updateOrder(orderData.orderId, payload);
-        console.log("Orden actualizada con éxito.");
-      } else {
-        await createOrder(payload);
-        console.log("Nueva orden creada con éxito.");
-      }
+      const createdOrUpdatedOrder = await createOrUpdateOrder(payload); // backend maneja crear/actualizar
+      const orderId = createdOrUpdatedOrder.orderId;
+      console.log("Orden guardada con éxito");
 
-      onDone?.();
+      // Recarga con navegación incluida
+      const { order, hasNext, hasPrevious } = await fetchOrderById(orderId);
+
+      setHasNextOrder(hasNext);
+      setHasPreviousOrder(hasPrevious);
+
+      // Mapea los datos para el frontend
+      const {
+        formattedOrderData,
+        formattedDetails,
+        formattedAddress
+      } = mapBackendData(order);
+
+
+      // Devuelve todo al hook principal (useOrderData)
+      onDone?.({
+        formattedOrderData,
+        formattedDetails,
+        formattedAddress,
+      });
+
     } catch (error) {
       console.error("Error al guardar orden:", error);
     }
   };
 
-  // Elimina una orden. Simulado.
-  const handleDeleteOrder = async () => {
-    // if (orderData?.orderId) {
-    //   await deleteOrder(orderData.orderId);
-    //   loadInitialOrder();
-    // }
-    console.log("Orden eliminada (simulada)");
-    loadInitialOrder();
+  // Elimina una orden.
+  const handleDeleteOrder = async (orderId) => {
+    try {
+      await deleteOrder(orderId);
+      console.log("Orden eliminada con éxito.");
+  
+      // Primero intenta cargar la siguiente
+      const next = await loadNextOrder(orderId);
+      if (next) return next;
+  
+      // Si no hay siguiente, intenta la anterior
+      const previous = await loadPreviousOrder(orderId);
+      if (previous) return previous;
+  
+      // Si no hay ninguna, retorna estado vacío
+      return {
+        formattedOrderData: null,
+        formattedDetails: [],
+        formattedAddress: '',
+      };
+    } catch (err) {
+      console.error("Error al eliminar orden:", err);
+    }
   };
 
   // Genera reporte PDF (simulado).
@@ -216,33 +236,3 @@ const useOrderCrud = ({
 };
 
 export default useOrderCrud;
-
-
-
-// Guarda una orden (crear o actualizar). Simulado por ahora.
-/*const handleSaveOrder = async (orderData, orderDetails, shippingAddressString, onDone) => {
-  const payload = {
-    customer: { contactName: orderData.customerName },
-    employee: { name: orderData.employeeName },
-    shippingAddress: shippingAddressString,
-    orderDate: orderData.orderDate,
-    orderDetails,
-    // orderDetails: orderDetails.map(detail => ({
-    //   productName: detail.productName,
-    //   quantity: detail.quantity,
-    //   unitPrice: detail.unitPrice,
-    // })),
-  };
-
-  // if (orderData.orderId) {
-  //   await updateOrder(orderData.orderId, payload);
-  // } else {
-  //   await createOrder(payload);
-  // }
-
-  console.log("Simulando guardar:", payload);
-  onDone?.();
-  //setIsEditing(false); (pendiente)
-  loadInitialOrder(); // Cargar la orden que guardamos (pendiente)
-};*/
-
